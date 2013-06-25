@@ -13,8 +13,8 @@ include_directories(include
                     ${catkin_INCLUDE_DIRS}   
 )
 
-#!!add_executable(test_geometry_msgs test/test_tf2_geometry_msgs.cpp)
-#!!catkin_add_gtest(${CMAKE_CURRENT_SOURCE_DIR}/test/test.launch)
+catkin_add_gtest(test_geometry_msgs test/test_tf2_geometry_msgs.cpp)
+add_rostest(${CMAKE_CURRENT_SOURCE_DIR}/test/test.launch)
 
 #install(TARGETS test_geometry_msgs
 #  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -25,3 +25,4 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 catkin_python_setup()
+

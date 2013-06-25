@@ -33,3 +33,4 @@ add_rostest(${CMAKE_CURRENT_SOURCE_DIR}/test/test.launch)
 install(PROGRAMS scripts/test.py
          DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
