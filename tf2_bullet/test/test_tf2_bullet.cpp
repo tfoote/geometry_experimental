@@ -97,8 +97,6 @@ TEST(TfBullet, ConvertVector)
 
 int main(int argc, char **argv){
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "test");
-  ros::NodeHandle n;
 
   tf_buffer = new tf2::Buffer();
 
