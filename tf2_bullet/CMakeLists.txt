@@ -1,13 +1,21 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(test_tf2)
+project(tf2_bullet)
 
-find_package(catkin REQUIRED COMPONENTS tf2_ros bullet geometry_msgs)
+find_package(PkgConfig REQUIRED)
 
-catkin_package()
+set(bullet_FOUND 0)
+pkg_check_modules(bullet REQUIRED bullet)
 
-add_executable(test_bullet test/test_tf2_bullet.cpp)
-catkin_add_gtest_build_flags(test_bullet)
+find_package(catkin REQUIRED COMPONENTS geometry_msgs rostest tf2_bullet tf2_ros)
 
-catkin_add_gtest(${CMAKE_CURRENT_SOURCE_DIR}/test/test.launch)
+include_directories(${bullet_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+catkin_package(INCLUDE_DIRS include ${bullet_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+catkin_add_gtest(test_bullet test/test_tf2_bullet.cpp)
+
+add_rostest(${CMAKE_CURRENT_SOURCE_DIR}/test/test.launch)
 
 
+install(DIRECTORY include/${PACKAGE_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
