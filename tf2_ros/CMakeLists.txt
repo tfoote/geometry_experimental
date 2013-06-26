@@ -76,7 +76,7 @@ add_dependencies(${PROJECT_NAME}_test_listener tf2_msgs_gencpp)
 target_link_libraries(${PROJECT_NAME}_test_listener
   ${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${GTEST_LIBRARRIES}
+  ${GTEST_LIBRARIES}
 )
 
 # Install rules
