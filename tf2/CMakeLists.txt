@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tf2)
 
-find_package(catkin REQUIRED COMPONENTS geometry_msgs tf2_msgs rospy roscpp rosconsole rostime)
+find_package(catkin REQUIRED COMPONENTS geometry_msgs tf2_msgs rospy rosconsole rostime)
 find_package(Boost REQUIRED COMPONENTS thread signals)
 
 catkin_python_setup()
