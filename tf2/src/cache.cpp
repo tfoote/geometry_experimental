@@ -257,6 +257,7 @@ bool TimeCache::insertData(const TransformStorage& new_data)
 {
   L_TransformStorage::iterator storage_it = storage_.begin();
 
+  //If non Zero length check for out of date data coming in. 
   if(storage_it != storage_.end())
   {
     if (storage_it->stamp_ > new_data.stamp_ + max_storage_time_)
@@ -266,12 +267,17 @@ bool TimeCache::insertData(const TransformStorage& new_data)
   }
 
 
+  // Find the right place in the linked list
   while(storage_it != storage_.end())
   {
     if (storage_it->stamp_ <= new_data.stamp_)
+    {
       break;
+    }
     storage_it++;
   }
+
+  // Insert the new value
   L_TransformStorage::iterator new_value = storage_.insert(storage_it, new_data);
   
   // Check if there are two other values inthe list and if the
@@ -297,7 +303,7 @@ bool TimeCache::insertData(const TransformStorage& new_data)
     }
     /* If the last element check the interpolation betwen it and the
        two in front of it */
-    else if (new_value == storage_.end())
+    else if (new_value == --storage_.end())
     {
       // reverse order because reverse walking
       final = new_value;
