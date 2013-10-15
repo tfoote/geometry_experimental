@@ -39,6 +39,8 @@
 #include <ros/time.h>
 #include <ros/types.h>
 
+#include <math.h>
+
 namespace geometry_msgs
 {
 ROS_DECLARE_MESSAGE(TransformStamped);
@@ -63,15 +65,16 @@ public:
 
   TransformStorage& operator=(const TransformStorage& rhs)
   {
-#if 01
     rotation_ = rhs.rotation_;
     translation_ = rhs.translation_;
     stamp_ = rhs.stamp_;
     frame_id_ = rhs.frame_id_;
     child_frame_id_ = rhs.child_frame_id_;
-#endif
     return *this;
   }
+
+  /* Return if the rhs TransformStorage has all elements within epsilon */
+  bool approximatelyEqual(const TransformStorage& rhs, double epsilon) const;
 
   tf2::Quaternion rotation_;
   tf2::Vector3 translation_;

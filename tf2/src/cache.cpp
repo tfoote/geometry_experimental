@@ -40,6 +40,8 @@
 
 using namespace tf2;
 
+double APPROXIMATELY_EQUAL_EPSILON = 0.000000001;
+
 TransformStorage::TransformStorage()
 {
 }
@@ -54,6 +56,21 @@ TransformStorage::TransformStorage(const geometry_msgs::TransformStamped& data, 
   rotation_ = tf2::Quaternion(o.x, o.y, o.z, o.w);
   const geometry_msgs::Vector3& v = data.transform.translation;
   translation_ = tf2::Vector3(v.x, v.y, v.z);
+}
+
+bool TransformStorage::approximatelyEqual(const TransformStorage& rhs, double epsilon) const
+{
+  return                                                                \
+    fabs(rotation_.x() - rhs.rotation_.x()) < epsilon &&                \
+    fabs(rotation_.y() - rhs.rotation_.y()) < epsilon &&                \
+    fabs(rotation_.z() - rhs.rotation_.z()) < epsilon &&                \
+    fabs(rotation_.w() - rhs.rotation_.w()) < epsilon &&                \
+    fabs(translation_.x() - rhs.translation_.x()) < epsilon &&          \
+    fabs(translation_.y() - rhs.translation_.y()) < epsilon &&          \
+    fabs(translation_.z() - rhs.translation_.z()) < epsilon &&          \
+    frame_id_ == rhs.frame_id_ &&                                       \
+    child_frame_id_ == rhs.child_frame_id_ &&                           \
+    fabs((stamp_ - rhs.stamp_).toSec()) < epsilon;
 }
 
 TimeCache::TimeCache(ros::Duration max_storage_time)
@@ -183,7 +200,7 @@ void TimeCache::interpolate(const TransformStorage& one, const TransformStorage&
   //Interpolate rotation
   output.rotation_ = slerp( one.rotation_, two.rotation_, ratio);
 
-  output.stamp_ = one.stamp_;
+  output.stamp_ = time;
   output.frame_id_ = one.frame_id_;
   output.child_frame_id_ = one.child_frame_id_;
 }
@@ -235,6 +252,7 @@ CompactFrameID TimeCache::getParent(ros::Time time, std::string* error_str)
   return p_temp_1->frame_id_;
 }
 
+
 bool TimeCache::insertData(const TransformStorage& new_data)
 {
   L_TransformStorage::iterator storage_it = storage_.begin();
@@ -254,8 +272,56 @@ bool TimeCache::insertData(const TransformStorage& new_data)
       break;
     storage_it++;
   }
-  storage_.insert(storage_it, new_data);
+  L_TransformStorage::iterator new_value = storage_.insert(storage_it, new_data);
+  
+  // Check if there are two other values inthe list and if the
+  // intermediate values is an interpolation of the surrounding two:
+  // remove it
 
+  L_TransformStorage::iterator length_test = storage_.begin();
+  if (++length_test != storage_.end() &&        \
+      ++length_test != storage_.end())
+  {
+
+    L_TransformStorage::iterator first;
+    L_TransformStorage::iterator intermediate;
+    L_TransformStorage::iterator final;
+
+    /* if inserting at the beginning check interpolate between new
+       element and the two behind it */
+    if (new_value == storage_.begin())
+    {
+      first = new_value;
+      intermediate = ++new_value;
+      final = ++new_value;
+    }
+    /* If the last element check the interpolation betwen it and the
+       two in front of it */
+    else if (new_value == storage_.end())
+    {
+      // reverse order because reverse walking
+      final = new_value;
+      intermediate = --new_value;
+      first = --new_value;
+    }
+    /* Otherwise check the current element against one in front and behind */
+    else
+    {
+      L_TransformStorage::iterator stepping_up = new_value;
+      L_TransformStorage::iterator stepping_down = new_value;
+      first = --stepping_down;
+      intermediate = new_value;
+      final = ++stepping_up;
+    }
+
+    TransformStorage output;
+    interpolate(*first, *final, intermediate->stamp_, output);
+    if (intermediate->approximatelyEqual(output, APPROXIMATELY_EQUAL_EPSILON))
+    {
+      storage_.erase(intermediate);
+    }    
+  }
+  // Clean up old elements at the back
   pruneList();
   return true;
 }

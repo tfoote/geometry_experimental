@@ -46,9 +46,14 @@ catkin_add_gtest(test_simple test/simple_tf2_core.cpp)
 target_link_libraries(test_simple tf2  ${console_bridge_LIBRARIES})
 add_dependencies(test_simple tf2_msgs_gencpp)
 
-add_executable(speed_test EXCLUDE_FROM_ALL test/speed_test.cpp)
-target_link_libraries(speed_test tf2  ${console_bridge_LIBRARIES})
-add_dependencies(tests speed_test)
+add_executable(${PROJECT_NAME}_speed_test EXCLUDE_FROM_ALL test/speed_test.cpp)
+target_link_libraries(${PROJECT_NAME}_speed_test tf2  ${console_bridge_LIBRARIES})
+add_dependencies(tests ${PROJECT_NAME}_speed_test)
+add_dependencies(tests tf2_msgs_gencpp)
+
+add_executable(${PROJECT_NAME}_buffer_speed_test EXCLUDE_FROM_ALL test/buffer_speed_test.cpp)
+target_link_libraries(${PROJECT_NAME}_buffer_speed_test tf2  ${console_bridge_LIBRARIES})
+add_dependencies(tests ${PROJECT_NAME}_buffer_speed_test)
 add_dependencies(tests tf2_msgs_gencpp)
 
 endif()
