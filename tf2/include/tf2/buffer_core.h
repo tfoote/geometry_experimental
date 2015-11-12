@@ -195,7 +195,7 @@ public:
 
     return msg;
   }
-  
+
   /** \brief Lookup the twist of the tracking_frame with respect to the observation frame in the reference_frame using the reference point
    * \param tracking_frame The frame to track
    * \param observation_frame The frame from which to measure the twist
@@ -205,15 +205,15 @@ public:
    * \param time The time at which to get the velocity
    * \param duration The period over which to average
    * \return twist The twist output
-   * 
-   * This will compute the average velocity on the interval 
+   *
+   * This will compute the average velocity on the interval
    * (time - duration/2, time+duration/2). If that is too close to the most
    * recent reading, in which case it will shift the interval up to
    * duration/2 to prevent extrapolation.
    *
    * Possible exceptions tf2::LookupException, tf2::ConnectivityException,
    * tf2::ExtrapolationException, tf2::InvalidArgumentException
-   * 
+   *
    * New in geometry 1.1
    */
   /*
@@ -335,7 +335,7 @@ public:
     return lookupOrInsertFrameNumber(frameid_str); 
   }
 
-  int _getLatestCommonTime(CompactFrameID target_frame, CompactFrameID source_frame, TimePoint& time, std::string* error_string) const {
+  tf2::TF2Error _getLatestCommonTime(CompactFrameID target_frame, CompactFrameID source_frame, TimePoint& time, std::string* error_string) const {
     boost::mutex::scoped_lock lock(frame_mutex_);
     return getLatestCommonTime(target_frame, source_frame, time, error_string);
   }
@@ -456,15 +456,15 @@ private:
 
   /**@brief Return the latest rostime which is common across the spanning set
    * zero if fails to cross */
-  int getLatestCommonTime(CompactFrameID target_frame, CompactFrameID source_frame, TimePoint& time, std::string* error_string) const;
+  tf2::TF2Error getLatestCommonTime(CompactFrameID target_frame, CompactFrameID source_frame, TimePoint& time, std::string* error_string) const;
 
   template<typename F>
-  int walkToTopParent(F& f, TimePoint time, CompactFrameID target_id, CompactFrameID source_id, std::string* error_string) const;
+  tf2::TF2Error walkToTopParent(F& f, TimePoint time, CompactFrameID target_id, CompactFrameID source_id, std::string* error_string) const;
 
   /**@brief Traverse the transform tree. If frame_chain is not NULL, store the traversed frame tree in vector frame_chain.
    * */
   template<typename F>
-  int walkToTopParent(F& f, TimePoint time, CompactFrameID target_id, CompactFrameID source_id, std::string* error_string, std::vector<CompactFrameID> *frame_chain) const;
+  tf2::TF2Error walkToTopParent(F& f, TimePoint time, CompactFrameID target_id, CompactFrameID source_id, std::string* error_string, std::vector<CompactFrameID> *frame_chain) const;
 
   void testTransformableRequests();
   bool canTransformInternal(CompactFrameID target_id, CompactFrameID source_id,

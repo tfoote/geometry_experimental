@@ -32,7 +32,6 @@
 #include "tf2/buffer_core.h"
 #include "tf2/time_cache.h"
 #include "tf2/exceptions.h"
-#include "tf2_msgs/TF2Error.h"
 
 #include <assert.h>
 #include <console_bridge/console.h>
@@ -238,13 +237,13 @@ enum WalkEnding
 
 // TODO for Jade: Merge walkToTopParent functions; this is now a stub to preserve ABI
 template<typename F>
-int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id, CompactFrameID source_id, std::string* error_string) const
+tf2::TF2Error BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id, CompactFrameID source_id, std::string* error_string) const
 {
   return walkToTopParent(f, time, target_id, source_id, error_string, NULL);
 }
 
 template<typename F>
-int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
+tf2::TF2Error BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
     CompactFrameID source_id, std::string* error_string, std::vector<CompactFrameID>
     *frame_chain) const
 {
@@ -255,14 +254,14 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
   if (source_id == target_id)
   {
     f.finalize(Identity, time);
-    return tf2_msgs::TF2Error::NO_ERROR;
+    return tf2::TF2Error::NO_ERROR;
   }
 
   //If getting the latest get the latest common time
   if (time == TimePoint(Duration(0)))
   {
-    int retval = getLatestCommonTime(target_id, source_id, time, error_string);
-    if (retval != tf2_msgs::TF2Error::NO_ERROR)
+    tf2::TF2Error retval = getLatestCommonTime(target_id, source_id, time, error_string);
+    if (retval != tf2::TF2Error::NO_ERROR)
     {
       return retval;
     }
@@ -302,7 +301,7 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
     if (frame == target_id)
     {
       f.finalize(TargetParentOfSource, time);
-      return tf2_msgs::TF2Error::NO_ERROR;
+      return tf2::TF2Error::NO_ERROR;
     }
 
     f.accum(true);
@@ -320,7 +319,7 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
            << allFramesAsStringNoLock() << std::endl;
         *error_string = ss.str();
       }
-      return tf2_msgs::TF2Error::LOOKUP_ERROR;
+      return tf2::TF2Error::LOOKUP_ERROR;
     }
   }
 
@@ -350,7 +349,7 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
         *error_string = ss.str();
       }
 
-      return tf2_msgs::TF2Error::EXTRAPOLATION_ERROR;
+      return tf2::TF2Error::EXTRAPOLATION_ERROR;
     }
 
     // Early out... source frame is a direct parent of the target frame
@@ -361,7 +360,7 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
       {
         frame_chain->swap(reverse_frame_chain);
       }
-      return tf2_msgs::TF2Error::NO_ERROR;
+      return tf2::TF2Error::NO_ERROR;
     }
 
     f.accum(false);
@@ -378,7 +377,7 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
            << allFramesAsStringNoLock() << std::endl;
         *error_string = ss.str();
       }
-      return tf2_msgs::TF2Error::LOOKUP_ERROR;
+      return tf2::TF2Error::LOOKUP_ERROR;
     }
   }
 
@@ -393,12 +392,12 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
         *error_string = ss.str();
       }
 
-      return tf2_msgs::TF2Error::EXTRAPOLATION_ERROR;
-      
+      return tf2::TF2Error::EXTRAPOLATION_ERROR;
+
     }
 
     createConnectivityErrorString(source_id, target_id, error_string);
-    return tf2_msgs::TF2Error::CONNECTIVITY_ERROR;
+    return tf2::TF2Error::CONNECTIVITY_ERROR;
   }
 
   f.finalize(FullPath, time);
@@ -424,8 +423,8 @@ int BufferCore::walkToTopParent(F& f, TimePoint time, CompactFrameID target_id,
       }
     }
   }
-  
-  return tf2_msgs::TF2Error::NO_ERROR;
+
+  return tf2::TF2Error::NO_ERROR;
 }
 
 
@@ -538,16 +537,16 @@ void BufferCore::lookupTransformImpl(const std::string& target_frame,
 
   std::string error_string;
   TransformAccum accum;
-  int retval = walkToTopParent(accum, time, target_id, source_id, &error_string);
-  if (retval != tf2_msgs::TF2Error::NO_ERROR)
+  tf2::TF2Error retval = walkToTopParent(accum, time, target_id, source_id, &error_string);
+  if (retval != tf2::TF2Error::NO_ERROR)
   {
     switch (retval)
     {
-    case tf2_msgs::TF2Error::CONNECTIVITY_ERROR:
+    case tf2::TF2Error::CONNECTIVITY_ERROR:
       throw ConnectivityException(error_string);
-    case tf2_msgs::TF2Error::EXTRAPOLATION_ERROR:
+    case tf2::TF2Error::EXTRAPOLATION_ERROR:
       throw ExtrapolationException(error_string);
-    case tf2_msgs::TF2Error::LOOKUP_ERROR:
+    case tf2::TF2Error::LOOKUP_ERROR:
       throw LookupException(error_string);
     default:
       logError("Unknown error code: %d", retval);
@@ -678,7 +677,7 @@ bool BufferCore::canTransformNoLock(CompactFrameID target_id, CompactFrameID sou
   }
 
   CanTransformAccum accum;
-  if (walkToTopParent(accum, time, target_id, source_id, error_msg) == tf2_msgs::TF2Error::NO_ERROR)
+  if (walkToTopParent(accum, time, target_id, source_id, error_msg) == tf2::TF2Error::NO_ERROR)
   {
     return true;
   }
@@ -838,10 +837,10 @@ struct TimeAndFrameIDFrameComparator
   CompactFrameID id;
 };
 
-int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID source_id, TimePoint & time, std::string * error_string) const
+tf2::TF2Error BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID source_id, TimePoint & time, std::string * error_string) const
 {
   // Error if one of the frames don't exist.
-  if (source_id == 0 || target_id == 0) return tf2_msgs::TF2Error::LOOKUP_ERROR;
+  if (source_id == 0 || target_id == 0) return tf2::TF2Error::LOOKUP_ERROR;
 
   if (source_id == target_id)
   {
@@ -851,7 +850,7 @@ int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID sou
       time = cache->getLatestTimestamp();
     else
       time = TimePointZero;
-    return tf2_msgs::TF2Error::NO_ERROR;
+    return tf2::TF2Error::NO_ERROR;
   }
 
   std::vector<P_TimeAndFrameID> lct_cache;
@@ -897,7 +896,7 @@ int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID sou
       {
         time = TimePoint(Duration(0));
       }
-      return tf2_msgs::TF2Error::NO_ERROR;
+      return tf2::TF2Error::NO_ERROR;
     }
 
     ++depth;
@@ -910,7 +909,7 @@ int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID sou
           << allFramesAsStringNoLock() << std::endl;
         *error_string = ss.str();
       }
-      return tf2_msgs::TF2Error::LOOKUP_ERROR;
+      return tf2::TF2Error::LOOKUP_ERROR;
     }
   }
 
@@ -957,7 +956,7 @@ int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID sou
       {
         time = TimePoint(Duration(0));
       }
-      return tf2_msgs::TF2Error::NO_ERROR;
+      return tf2::TF2Error::NO_ERROR;
     }
 
     ++depth;
@@ -970,14 +969,14 @@ int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID sou
           << allFramesAsStringNoLock() << std::endl;
         *error_string = ss.str();
       }
-      return tf2_msgs::TF2Error::LOOKUP_ERROR;
+      return tf2::TF2Error::LOOKUP_ERROR;
     }
   }
 
   if (common_parent == 0)
   {
     createConnectivityErrorString(source_id, target_id, error_string);
-    return tf2_msgs::TF2Error::CONNECTIVITY_ERROR;
+    return tf2::TF2Error::CONNECTIVITY_ERROR;
   }
 
   // Loop through the source -> root list until we hit the common parent
@@ -1004,7 +1003,7 @@ int BufferCore::getLatestCommonTime(CompactFrameID target_id, CompactFrameID sou
   }
 
   time = common_time;
-  return tf2_msgs::TF2Error::NO_ERROR;
+  return tf2::TF2Error::NO_ERROR;
 }
 
 std::string BufferCore::allFramesAsYAML(TimePoint current_time) const
@@ -1435,17 +1434,17 @@ void BufferCore::_chainAsVector(const std::string & target_frame, TimePoint targ
   CompactFrameID target_id = lookupFrameNumber(target_frame);
 
   std::vector<CompactFrameID> source_frame_chain;
-  int retval = walkToTopParent(accum, source_time, fixed_id, source_id, &error_string, &source_frame_chain);
+  tf2::TF2Error retval = walkToTopParent(accum, source_time, fixed_id, source_id, &error_string, &source_frame_chain);
 
-  if (retval != tf2_msgs::TF2Error::NO_ERROR)
+  if (retval != tf2::TF2Error::NO_ERROR)
   {
     switch (retval)
     {
-    case tf2_msgs::TF2Error::CONNECTIVITY_ERROR:
+    case tf2::TF2Error::CONNECTIVITY_ERROR:
       throw ConnectivityException(error_string);
-    case tf2_msgs::TF2Error::EXTRAPOLATION_ERROR:
+    case tf2::TF2Error::EXTRAPOLATION_ERROR:
       throw ExtrapolationException(error_string);
-    case tf2_msgs::TF2Error::LOOKUP_ERROR:
+    case tf2::TF2Error::LOOKUP_ERROR:
       throw LookupException(error_string);
     default:
       logError("Unknown error code: %d", retval);
@@ -1457,15 +1456,15 @@ void BufferCore::_chainAsVector(const std::string & target_frame, TimePoint targ
     std::vector<CompactFrameID> target_frame_chain;
     retval = walkToTopParent(accum, target_time, target_id, fixed_id, &error_string, &target_frame_chain);
 
-    if (retval != tf2_msgs::TF2Error::NO_ERROR)
+    if (retval != tf2::TF2Error::NO_ERROR)
     {
       switch (retval)
       {
-      case tf2_msgs::TF2Error::CONNECTIVITY_ERROR:
+      case tf2::TF2Error::CONNECTIVITY_ERROR:
         throw ConnectivityException(error_string);
-      case tf2_msgs::TF2Error::EXTRAPOLATION_ERROR:
+      case tf2::TF2Error::EXTRAPOLATION_ERROR:
         throw ExtrapolationException(error_string);
-      case tf2_msgs::TF2Error::LOOKUP_ERROR:
+      case tf2::TF2Error::LOOKUP_ERROR:
         throw LookupException(error_string);
       default:
         logError("Unknown error code: %d", retval);
