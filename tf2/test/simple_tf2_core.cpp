@@ -34,6 +34,8 @@
 #include "tf2/LinearMath/Vector3.h"
 #include "tf2/exceptions.h"
 
+typedef std::chrono::system_clock::time_point TimePoint;
+
 void seed_rand()
 {
   //Seed random number generator with current microseond count
@@ -78,14 +80,14 @@ TEST(tf2, setTransformValid)
 TEST(tf2_lookupTransform, LookupException_Nothing_Exists)
 {
   tf2::BufferCore tfc;
-  EXPECT_THROW(tfc.lookupTransform("a", "b", ros::Time().fromSec(1.0)), tf2::LookupException);
+  EXPECT_THROW(tfc.lookupTransform("a", "b", TimePoint(std::chrono::seconds(1))), tf2::LookupException);
   
 }
 
 TEST(tf2_canTransform, Nothing_Exists)
 {
   tf2::BufferCore tfc;
-  EXPECT_FALSE(tfc.canTransform("a", "b", ros::Time().fromSec(1.0)));
+  EXPECT_FALSE(tfc.canTransform("a", "b", TimePoint(std::chrono::seconds(1))));
   
 }
 
@@ -98,7 +100,7 @@ TEST(tf2_lookupTransform, LookupException_One_Exists)
   st.child_frame_id = "child";
   st.transform.rotation.w = 1;
   EXPECT_TRUE(tfc.setTransform(st, "authority1"));
-  EXPECT_THROW(tfc.lookupTransform("foo", "bar", ros::Time().fromSec(1.0)), tf2::LookupException);
+  EXPECT_THROW(tfc.lookupTransform("foo", "bar", TimePoint(std::chrono::seconds(1))), tf2::LookupException);
   
 }
 
@@ -111,7 +113,7 @@ TEST(tf2_canTransform, One_Exists)
   st.child_frame_id = "child";
   st.transform.rotation.w = 1;
   EXPECT_TRUE(tfc.setTransform(st, "authority1"));
-  EXPECT_FALSE(tfc.canTransform("foo", "bar", ros::Time().fromSec(1.0)));
+  EXPECT_FALSE(tfc.canTransform("foo", "bar", TimePoint(std::chrono::seconds(1))));
 }
 
 

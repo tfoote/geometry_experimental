@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tf2)
 
+add_definitions(-std=gnu++11)
+
 find_package(console_bridge REQUIRED)
-find_package(catkin REQUIRED COMPONENTS geometry_msgs rostime tf2_msgs)
+find_package(catkin REQUIRED COMPONENTS geometry_msgs tf2_msgs)
 find_package(Boost REQUIRED COMPONENTS signals system thread)
 
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES tf2 
    DEPENDS console_bridge
-   CATKIN_DEPENDS geometry_msgs tf2_msgs rostime)
+   CATKIN_DEPENDS geometry_msgs tf2_msgs)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${console_bridge_INCLUDE_DIRS})
 include_directories (src/bt) 

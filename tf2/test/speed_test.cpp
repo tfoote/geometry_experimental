@@ -29,7 +29,6 @@
 
 #include <tf2/buffer_core.h>
 
-#include <ros/time.h>
 #include <console_bridge/console.h>
 
 #include <boost/lexical_cast.hpp>
@@ -109,7 +108,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      out_t = bc.lookupTransform(v_frame1, v_frame0, ros::Time(0));
+      out_t = bc.lookupTransform(v_frame1, v_frame0, tf2::TimePoint());
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -123,7 +122,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      out_t = bc.lookupTransform(v_frame1, v_frame0, ros::Time(1));
+      out_t = bc.lookupTransform(v_frame1, v_frame0, tf2::TimePoint(std::chrono::seconds(1)));
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -137,7 +136,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      out_t = bc.lookupTransform(v_frame1, v_frame0, ros::Time(1.5));
+      out_t = bc.lookupTransform(v_frame1, v_frame0, tf2::TimePoint(std::chrono::milliseconds(1500)));
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -151,7 +150,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      out_t = bc.lookupTransform(v_frame1, v_frame0, ros::Time(2));
+      out_t = bc.lookupTransform(v_frame1, v_frame0, tf2::TimePoint(std::chrono::seconds(2)));
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -165,7 +164,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      bc.canTransform(v_frame1, v_frame0, ros::Time(0));
+      bc.canTransform(v_frame1, v_frame0, tf2::TimePoint());
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -179,7 +178,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      bc.canTransform(v_frame1, v_frame0, ros::Time(1));
+      bc.canTransform(v_frame1, v_frame0, tf2::TimePoint(std::chrono::seconds(1)));
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -193,7 +192,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      bc.canTransform(v_frame1, v_frame0, ros::Time(1.5));
+      bc.canTransform(v_frame1, v_frame0, tf2::TimePoint(std::chrono::milliseconds(1500)));
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;
@@ -207,7 +206,7 @@ int main(int argc, char** argv)
     ros::WallTime start = ros::WallTime::now();
     for (uint32_t i = 0; i < count; ++i)
     {
-      bc.canTransform(v_frame1, v_frame0, ros::Time(2));
+      bc.canTransform(v_frame1, v_frame0, tf2::TimePoint(std::chrono::seconds(2)));
     }
     ros::WallTime end = ros::WallTime::now();
     ros::WallDuration dur = end - start;

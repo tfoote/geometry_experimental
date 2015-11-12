@@ -83,7 +83,7 @@ TEST(TimeCache, Repeatability)
   for ( uint64_t i = 1; i < runs ; i++ )
   {
     stor.frame_id_ = i;
-    stor.stamp_ = ros::Time().fromNSec(i);
+    stor.stamp_ = TimePoint(std::chrono::nanoseconds(i));
     
     cache.insertData(stor);
   }
@@ -91,9 +91,9 @@ TEST(TimeCache, Repeatability)
   for ( uint64_t i = 1; i < runs ; i++ )
 
   {
-    cache.getData(ros::Time().fromNSec(i), stor);
+    cache.getData(TimePoint(std::chrono::nanoseconds(i)), stor);
     EXPECT_EQ(stor.frame_id_, i);
-    EXPECT_EQ(stor.stamp_, ros::Time().fromNSec(i));
+    EXPECT_EQ(stor.stamp_, TimePoint(std::chrono::nanoseconds(i)));
   }
   
 }
@@ -110,16 +110,16 @@ TEST(TimeCache, RepeatabilityReverseInsertOrder)
   for ( int i = runs -1; i >= 0 ; i-- )
   {
     stor.frame_id_ = i;
-    stor.stamp_ = ros::Time().fromNSec(i);
+    stor.stamp_ = TimePoint(std::chrono::nanoseconds(i));
     
     cache.insertData(stor);
   }
   for ( uint64_t i = 1; i < runs ; i++ )
 
   {
-    cache.getData(ros::Time().fromNSec(i), stor);
+    cache.getData(TimePoint(std::chrono::nanoseconds(i)), stor);
     EXPECT_EQ(stor.frame_id_, i);
-    EXPECT_EQ(stor.stamp_, ros::Time().fromNSec(i));
+    EXPECT_EQ(stor.stamp_, TimePoint(std::chrono::nanoseconds(i)));
   }
   
 }
@@ -174,36 +174,36 @@ TEST(TimeCache, ZeroAtFront)
   for ( uint64_t i = 1; i < runs ; i++ )
   {
     stor.frame_id_ = i;
-    stor.stamp_ = ros::Time().fromNSec(i);
+    stor.stamp_ = TimePoint(std::chrono::nanoseconds(i));
     
     cache.insertData(stor);
   }
 
   stor.frame_id_ = runs;
-  stor.stamp_ = ros::Time().fromNSec(runs);
+  stor.stamp_ = TimePoint(std::chrono::nanoseconds(runs));
   cache.insertData(stor);
 
   for ( uint64_t i = 1; i < runs ; i++ )
 
   {
-    cache.getData(ros::Time().fromNSec(i), stor);
+    cache.getData(TimePoint(std::chrono::nanoseconds(i)), stor);
     EXPECT_EQ(stor.frame_id_, i);
-    EXPECT_EQ(stor.stamp_, ros::Time().fromNSec(i));
+    EXPECT_EQ(stor.stamp_, TimePoint(std::chrono::nanoseconds(i)));
   }
 
-  cache.getData(ros::Time(), stor);
+  cache.getData(TimePoint(), stor);
   EXPECT_EQ(stor.frame_id_, runs);
-  EXPECT_EQ(stor.stamp_, ros::Time().fromNSec(runs));
+  EXPECT_EQ(stor.stamp_, TimePoint(std::chrono::nanoseconds(runs)));
 
   stor.frame_id_ = runs;
-  stor.stamp_ = ros::Time().fromNSec(runs+1);
+  stor.stamp_ = TimePoint(std::chrono::nanoseconds(runs+1));
   cache.insertData(stor);
 
 
   //Make sure we get a different value now that a new values is added at the front
-  cache.getData(ros::Time(), stor);
+  cache.getData(TimePoint(), stor);
   EXPECT_EQ(stor.frame_id_, runs);
-  EXPECT_EQ(stor.stamp_, ros::Time().fromNSec(runs+1));
+  EXPECT_EQ(stor.stamp_, TimePoint(std::chrono::nanoseconds(runs+1)));
   
 }
 
@@ -234,13 +234,13 @@ TEST(TimeCache, CartesianInterpolation)
     
       stor.translation_.setValue(xvalues[step], yvalues[step], zvalues[step]);
       stor.frame_id_ = 2;
-      stor.stamp_ = ros::Time().fromNSec(step * 100 + offset);
+      stor.stamp_ = TimePoint(std::chrono::nanoseconds(step * 100 + offset));
       cache.insertData(stor);
     }
     
     for (int pos = 0; pos < 100 ; pos ++)
     {
-      cache.getData(ros::Time().fromNSec(offset + pos), stor);
+      cache.getData(TimePoint(std::chrono::nanoseconds(offset + pos)), stor);
       double x_out = stor.translation_.x();
       double y_out = stor.translation_.y();
       double z_out = stor.translation_.z();
@@ -284,13 +284,13 @@ TEST(TimeCache, ReparentingInterpolationProtection)
 
     stor.translation_.setValue(xvalues[step], yvalues[step], zvalues[step]);
     stor.frame_id_ = step + 4;
-    stor.stamp_ = ros::Time().fromNSec(step * 100 + offset);
+    stor.stamp_ = TimePoint(std::chrono::nanoseconds(step * 100 + offset));
     cache.insertData(stor);
   }
   
   for (int pos = 0; pos < 100 ; pos ++)
   {
-    EXPECT_TRUE(cache.getData(ros::Time().fromNSec(offset + pos), stor));
+    EXPECT_TRUE(cache.getData(TimePoint(std::chrono::nanoseconds(offset + pos)), stor));
     double x_out = stor.translation_.x();
     double y_out = stor.translation_.y();
     double z_out = stor.translation_.z();
@@ -352,13 +352,13 @@ TEST(TimeCache, AngularInterpolation)
       quats[step].setRPY(yawvalues[step], pitchvalues[step], rollvalues[step]);
       stor.rotation_ = quats[step];
       stor.frame_id_ = 3;
-      stor.stamp_ = ros::Time().fromNSec(offset + (step * 100)); //step = 0 or 1
+      stor.stamp_ = TimePoint(std::chrono::nanoseconds(offset + (step * 100))); //step = 0 or 1
       cache.insertData(stor);
     }
     
     for (int pos = 0; pos < 100 ; pos ++)
     {
-      EXPECT_TRUE(cache.getData(ros::Time().fromNSec(offset + pos), stor)); //get the transform for the position
+      EXPECT_TRUE(cache.getData(TimePoint(std::chrono::nanoseconds(offset + pos)), stor)); //get the transform for the position
       tf2::Quaternion quat (stor.rotation_);
 
       //Generate a ground truth quaternion directly calling slerp
@@ -383,14 +383,14 @@ TEST(TimeCache, DuplicateEntries)
   TransformStorage stor;
   setIdentity(stor);
   stor.frame_id_ = 3;
-  stor.stamp_ = ros::Time().fromNSec(1);
+  stor.stamp_ = TimePoint(std::chrono::nanoseconds(1));
 
   cache.insertData(stor);
 
   cache.insertData(stor);
 
 
-  cache.getData(ros::Time().fromNSec(1), stor);
+  cache.getData(TimePoint(std::chrono::nanoseconds(1)), stor);
   
   //printf(" stor is %f\n", stor.translation_.x());
   EXPECT_TRUE(!std::isnan(stor.translation_.x()));

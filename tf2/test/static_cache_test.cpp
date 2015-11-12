@@ -57,14 +57,14 @@ TEST(StaticCache, Repeatability)
   for ( uint64_t i = 1; i < runs ; i++ )
   {
     stor.frame_id_ = CompactFrameID(i);
-    stor.stamp_ = ros::Time().fromNSec(i);
+    stor.stamp_ = TimePoint(std::chrono::nanoseconds(i));
     
     cache.insertData(stor);
 
     
-    cache.getData(ros::Time().fromNSec(i), stor);
+    cache.getData(TimePoint(std::chrono::nanoseconds(i)), stor);
     EXPECT_EQ(stor.frame_id_, i);
-    EXPECT_EQ(stor.stamp_, ros::Time().fromNSec(i));
+    EXPECT_EQ(stor.stamp_, TimePoint(std::chrono::nanoseconds(i)));
     
   }
 }
@@ -77,14 +77,14 @@ TEST(StaticCache, DuplicateEntries)
   TransformStorage stor;
   setIdentity(stor);
   stor.frame_id_ = CompactFrameID(3);
-  stor.stamp_ = ros::Time().fromNSec(1);
+  stor.stamp_ = TimePoint(std::chrono::nanoseconds(1));
 
   cache.insertData(stor);
 
   cache.insertData(stor);
 
 
-  cache.getData(ros::Time().fromNSec(1), stor);
+  cache.getData(TimePoint(std::chrono::nanoseconds(1)), stor);
   
   //printf(" stor is %f\n", stor.transform.translation.x);
   EXPECT_TRUE(!std::isnan(stor.translation_.x()));
